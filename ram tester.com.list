@@ -1,0 +1,392 @@
+EMU8086 GENERATED LISTING. MACHINE CODE <- SOURCE.
+ 
+ram tester.com -- emu8086 assembler version: 4.08  
+ 
+[ 4/27/2017  --  12:41:52 AM ] 
+ 
+===================================================================================================
+[LINE]     LOC: MACHINE CODE                          SOURCE
+===================================================================================================
+ 
+[   1]        :                                       .model tiny
+[   2]    0100: EB 00                                 .data
+[   3]        :                                       	porta1 equ 10h
+[   4]        :                                       	portb1 equ 12h
+[   5]        :                                       	portc1 equ 14h
+[   6]        :                                       	creg1 equ 16h
+[   7]        :                                       
+[   8]        :                                       	porta2 equ 20h
+[   9]        :                                       	portb2 equ 22h
+[  10]        :                                       	portc2 equ 24h
+[  11]        :                                       	creg2 equ 26h
+[  12]    0102:                                       .code
+[  13]    0102:                                       .startup
+[  14]        :                                       
+[  15]    0102:                                       top:
+[  16]        :                                       
+[  17]    0102: B8 80 00                              	mov ax,0080h
+[  18]    0105: 8E D8                                 	mov ds,ax
+[  19]    0107: B0 89                                 	mov al,10001001b        ;load control word of 8255
+[  20]    0109: E6 16                                 	out creg1,al            ;initialise lcd
+[  21]    010B: E8 78 00                              	call init_lcd           ;get data from portc1
+[  22]    010E: E4 14                                 	in al,portc1            ;get ram to be tested
+[  23]    0110: 24 01                                 	and al,00000001b
+[  24]    0112: 74 08                                 	jz r2
+[  25]        :                                       
+[  26]    0114: BE FF 07                              mov si,7ffh              ;max address of 6116
+[  27]    0117: E8 2C 01                              call print6116
+[  28]    011A: EB 08                                 	jmp t
+[  29]        :                                       
+[  30]    011C: BE FF 7F                              r2:	mov si,7fffh             ;max address of 62256
+[  31]    011F: E8 6E 01                              	call print62256
+[  32]    0122: EB 00                                 	jmp t
+[  33]        :                                       ;for writing 0s
+[  34]    0124: B7 00                                 t:	mov bh,00h               ;for writing 1s
+[  35]    0126: B3 01                                 	mov bl,01h
+[  36]    0128: BA 00 00                              	mov dx,00h
+[  37]    012B: B4 08                                 r1:	mov ah,08h                ;for 1-byte
+[  38]        :                                       
+[  39]    012D: 8A EF                                 r:	mov ch,bh
+[  40]    012F: E8 E8 01                              	call memwrite             ;write to memory
+[  41]    0132: E8 D3 01                              	call memread              ;read from memory
+[  42]    0135: 22 C3                                 	and al,bl
+[  43]    0137: 3A C5                                 	cmp al,ch
+[  44]    0139: 75 1E                                 	jnz pass                  ;jump to pass
+[  45]        :                                       
+[  46]    013B: 8A EB                                 	mov ch,bl
+[  47]    013D: E8 DA 01                              	call memwrite
+[  48]    0140: E8 C5 01                              	call memread
+[  49]    0143: 22 C3                                 	and al,bl
+[  50]    0145: 3A C5                                 	cmp al,ch
+[  51]    0147: 75 10                                 	jnz pass
+[  52]        :                                       	
+[  53]    0149: D0 C3                                 	rol bl,01                 ; roll bl
+[  54]    014B: FE CC                                 	dec ah
+[  55]    014D: 75 DE                                 	jnz r
+[  56]        :                                       	
+[  57]    014F: 42                                    	inc dx
+[  58]    0150: 3B D6                                 	cmp dx,si
+[  59]    0152: 75 D7                                 	jnz r1                   ;if not max address goto r1
+[  60]        :                                       	
+[  61]        :                                       	; call print6116
+[  62]        :                                       
+[  63]    0154: E8 B6 00                              	call failwrt             ;ram is correct so print pass
+[  64]    0157: EB 13                                 	jmp eop
+[  65]        :                                       
+[  66]        :                                       ; call print6116
+[  67]    0159: E8 78 00                              pass:	call passwrt         ;print fail
+[  68]        :                                       
+[  69]        :                                       
+[  70]        :                                       
+[  71]        :                                       	
+[  72]        :                                       
+[  73]        :                                       	; mov al, 'P'
+[  74]        :                                       	; ; dec al
+[  75]        :                                       	; call writecommand2
+[  76]        :                                       	; call delayprog
+[  77]        :                                       	
+[  78]        :                                       	; ; mov al,14h
+[  79]        :                                       	; ; call writecommand
+[  80]        :                                       	; ; call delayprog
+[  81]        :                                       
+[  82]        :                                       	; mov al, 'A'
+[  83]        :                                       	; ; dec al
+[  84]        :                                       	; call writecommand2
+[  85]        :                                       	; call delayprog
+[  86]        :                                       	
+[  87]        :                                       	; ; mov al,14h
+[  88]        :                                       	; ; call writecommand
+[  89]        :                                       	; ; call delayprog
+[  90]        :                                       
+[  91]        :                                       	; mov al, 'S'
+[  92]        :                                       	; ; dec al
+[  93]        :                                       	; call writecommand2
+[  94]        :                                       	; call delayprog
+[  95]        :                                       	
+[  96]        :                                       	; ; mov al,14h
+[  97]        :                                       	; ; call writecommand
+[  98]        :                                       	; ; call delayprog
+[  99]        :                                       
+[ 100]        :                                       	; mov al, 'S'
+[ 101]        :                                       	; ; dec al
+[ 102]        :                                       	; call writecommand2
+[ 103]        :                                       	; call delayprog
+[ 104]        :                                       
+[ 105]        :                                       
+[ 106]        :                                       
+[ 107]    015C: E4 14                                 	in al,portc1            ;get ram to be tested
+[ 108]    015E: 24 01                                 	and al,00000001b
+[ 109]    0160: 8A E0                                 	mov ah, al
+[ 110]    0162:                                       chk:
+[ 111]    0162: E4 14                                 	in al,portc1            ;get ram to be tested
+[ 112]    0164: 24 01                                 	and al,00000001b
+[ 113]    0166: 3A C4                                 	cmp al, ah
+[ 114]    0168: 74 F8                                 	je chk
+[ 115]        :                                       
+[ 116]    016A: EB 96                                 	jmp top
+[ 117]        :                                       
+[ 118]    016C: 90                                    eop: nop
+[ 119]    016D: EB FD                                 jmp eop
+[ 120]        :                                       
+[ 121]        :                                       
+[ 122]        :                                       
+[ 123]        :                                       
+[ 124]    016F: B8 00 4C CD 21                        .exit
+[ 125]        :                                       
+[ 126]    0174:                                       lcdp proc near
+[ 127]    0174: 9C                                    	pushf
+[ 128]    0175: 50                                    	push ax
+[ 129]    0176: 53                                    	push bx
+[ 130]    0177: 51                                    	push cx
+[ 131]    0178: 52                                    	push dx
+[ 132]        :                                       	
+[ 133]    0179: B0 80                                 	mov al,80h
+[ 134]    017B: E6 10                                 	out porta1,al
+[ 135]    017D: E8 2C 00                              	call clear
+[ 136]        :                                       	
+[ 137]    0180: 5A                                    	pop dx
+[ 138]    0181: 59                                    	pop cx
+[ 139]    0182: 5B                                    	pop bx
+[ 140]    0183: 58                                    	pop ax
+[ 141]    0184: 9D                                    	popf
+[ 142]    0185: C3                                    	ret
+[ 143]        :                                       lcdp endp
+[ 144]        :                                       
+[ 145]    0186:                                       init_lcd proc near                    ;initialising the lcd
+[ 146]    0186: B0 38                                 mov al,38h
+[ 147]    0188: E8 2D 00                              call writecommand
+[ 148]    018B: E8 6B 01                              call delayprog
+[ 149]    018E: E8 68 01                              call delayprog
+[ 150]    0191: E8 65 01                              call delayprog
+[ 151]    0194: B0 0E                                 	mov al,0eh
+[ 152]    0196: E8 1F 00                              	call writecommand
+[ 153]    0199: E8 5D 01                              	call delayprog
+[ 154]    019C: B0 01                                 	mov al,01
+[ 155]    019E: E8 17 00                              	call writecommand
+[ 156]    01A1: E8 55 01                              	call delayprog
+[ 157]    01A4: B0 06                                 	mov al,06h
+[ 158]    01A6: E8 0F 00                              	call writecommand
+[ 159]    01A9: E8 4D 01                              	call delayprog
+[ 160]        :                                       init_lcd endp
+[ 161]        :                                       
+[ 162]        :                                       
+[ 163]    01AC:                                       clear proc                               ;clearing the lcd
+[ 164]    01AC: B0 01                                 	mov al,01
+[ 165]    01AE: E8 07 00                              	call writecommand
+[ 166]    01B1: E8 45 01                              	call delayprog
+[ 167]    01B4: E8 42 01                              	call delayprog
+[ 168]    01B7: C3                                    	ret
+[ 169]        :                                       clear endp
+[ 170]        :                                       
+[ 171]    01B8:                                       writecommand proc                        ;writing
+[ 172]    01B8: BA 10 00                              	mov dx,porta1
+[ 173]    01BB: EE                                    	out dx,al
+[ 174]    01BC: BA 12 00                              	mov dx,portb1
+[ 175]    01BF: B0 04                                 	mov al, 00000100b
+[ 176]    01C1: EE                                    	out dx,al
+[ 177]    01C2: B0 00                                 	mov al, 00000000b
+[ 178]    01C4: EE                                    	out dx,al
+[ 179]    01C5: C3                                    	ret
+[ 180]        :                                       writecommand endp
+[ 181]        :                                       
+[ 182]    01C6:                                       writecommand2 proc                        ;writing
+[ 183]    01C6: BA 10 00                              	mov dx,porta1
+[ 184]    01C9: EE                                    	out dx,al
+[ 185]        :                                       
+[ 186]    01CA: BA 12 00                              	mov dx,portb1
+[ 187]    01CD: B0 05                                 	mov al, 00000101b
+[ 188]    01CF: EE                                    	out dx,al
+[ 189]        :                                       	
+[ 190]    01D0: B0 01                                 	mov al, 00000001b
+[ 191]    01D2: EE                                    	out dx,al
+[ 192]        :                                       	
+[ 193]    01D3: C3                                    	ret
+[ 194]        :                                       writecommand2 endp
+[ 195]        :                                       
+[ 196]    01D4:                                       passwrt proc near
+[ 197]        :                                       	                           ;writing 'PASS'
+[ 198]    01D4: B0 50                                 	mov al,'P'
+[ 199]    01D6: E8 ED FF                              	call writecommand2
+[ 200]    01D9: E8 1D 01                              	call delayprog
+[ 201]    01DC: E8 1A 01                              	call delayprog
+[ 202]    01DF: E8 17 01                              	call delayprog
+[ 203]    01E2: B0 41                                 	mov al,'A'
+[ 204]    01E4: E8 DF FF                              	call writecommand2
+[ 205]    01E7: E8 0F 01                              	call delayprog
+[ 206]    01EA: E8 0C 01                              	call delayprog
+[ 207]    01ED: E8 09 01                              	call delayprog
+[ 208]    01F0: B0 53                                 	mov al,'S'
+[ 209]    01F2: E8 D1 FF                              	call writecommand2
+[ 210]    01F5: E8 01 01                              	call delayprog
+[ 211]    01F8: E8 FE 00                              	call delayprog
+[ 212]    01FB: E8 FB 00                              	call delayprog
+[ 213]    01FE: B0 53                                 	mov al,'S'
+[ 214]    0200: E8 C3 FF                              	call writecommand2
+[ 215]    0203: E8 F3 00                              	call delayprog
+[ 216]    0206: E8 F0 00                              	call delayprog
+[ 217]    0209: E8 ED 00                              	call delayprog
+[ 218]    020C: C3                                    	ret
+[ 219]        :                                       passwrt endp
+[ 220]        :                                       
+[ 221]    020D:                                       failwrt proc near                           ;writing 'FAIL'
+[ 222]        :                                       	
+[ 223]    020D: B0 46                                 	mov al,'F'
+[ 224]    020F: E8 B4 FF                              	call writecommand2
+[ 225]    0212: E8 E4 00                              	call delayprog
+[ 226]    0215: E8 E1 00                              	call delayprog
+[ 227]    0218: E8 DE 00                              	call delayprog
+[ 228]    021B: B0 41                                 	mov al,'A'
+[ 229]    021D: E8 A6 FF                              	call writecommand2
+[ 230]    0220: E8 D6 00                              	call delayprog
+[ 231]    0223: E8 D3 00                              	call delayprog
+[ 232]    0226: E8 D0 00                              	call delayprog
+[ 233]    0229: B0 49                                 	mov al,'I'
+[ 234]    022B: E8 98 FF                              	call writecommand2
+[ 235]    022E: E8 C8 00                              	call delayprog
+[ 236]    0231: E8 C5 00                              	call delayprog
+[ 237]    0234: E8 C2 00                              	call delayprog
+[ 238]    0237: B0 4C                                 	mov al,'L'
+[ 239]    0239: E8 8A FF                              	call writecommand2
+[ 240]    023C: E8 BA 00                              	call delayprog
+[ 241]    023F: E8 B7 00                              	call delayprog
+[ 242]    0242: E8 B4 00                              	call delayprog
+[ 243]    0245: C3                                    	ret
+[ 244]        :                                       failwrt endp
+[ 245]        :                                       
+[ 246]    0246:                                       print6116 proc near                           ;writing 'FAIL'
+[ 247]    0246: E8 63 FF                              	call clear
+[ 248]    0249: B0 36                                 	mov al,'6'
+[ 249]    024B: E8 78 FF                              	call writecommand2
+[ 250]    024E: E8 A8 00                              	call delayprog
+[ 251]    0251: E8 A5 00                              	call delayprog
+[ 252]    0254: E8 A2 00                              	call delayprog
+[ 253]    0257: B0 31                                 	mov al,'1'
+[ 254]    0259: E8 6A FF                              	call writecommand2
+[ 255]    025C: E8 9A 00                              	call delayprog
+[ 256]    025F: E8 97 00                              	call delayprog
+[ 257]    0262: E8 94 00                              	call delayprog
+[ 258]    0265: B0 31                                 	mov al,'1'
+[ 259]    0267: E8 5C FF                              	call writecommand2
+[ 260]    026A: E8 8C 00                              	call delayprog
+[ 261]    026D: E8 89 00                              	call delayprog
+[ 262]    0270: E8 86 00                              	call delayprog
+[ 263]    0273: B0 36                                 	mov al,'6'
+[ 264]    0275: E8 4E FF                              	call writecommand2
+[ 265]    0278: E8 7E 00                              	call delayprog
+[ 266]    027B: E8 7B 00                              	call delayprog
+[ 267]    027E: E8 78 00                              	call delayprog
+[ 268]    0281: B0 20                                 	mov al,' '
+[ 269]    0283: E8 40 FF                              	call writecommand2
+[ 270]    0286: E8 70 00                              	call delayprog
+[ 271]    0289: E8 6D 00                              	call delayprog
+[ 272]    028C: E8 6A 00                              	call delayprog
+[ 273]    028F: C3                                    	ret
+[ 274]        :                                       print6116 endp
+[ 275]        :                                       
+[ 276]        :                                       
+[ 277]    0290:                                       print62256 proc near                           ;writing 'FAIL'
+[ 278]    0290: E8 19 FF                              	call clear
+[ 279]    0293: B0 36                                 	mov al,'6'
+[ 280]    0295: E8 2E FF                              	call writecommand2
+[ 281]    0298: E8 5E 00                              	call delayprog
+[ 282]    029B: E8 5B 00                              	call delayprog
+[ 283]    029E: E8 58 00                              	call delayprog
+[ 284]    02A1: B0 32                                 	mov al,'2'
+[ 285]    02A3: E8 20 FF                              	call writecommand2
+[ 286]    02A6: E8 50 00                              	call delayprog
+[ 287]    02A9: E8 4D 00                              	call delayprog
+[ 288]    02AC: E8 4A 00                              	call delayprog
+[ 289]    02AF: B0 32                                 	mov al,'2'
+[ 290]    02B1: E8 12 FF                              	call writecommand2
+[ 291]    02B4: E8 42 00                              	call delayprog
+[ 292]    02B7: E8 3F 00                              	call delayprog
+[ 293]    02BA: E8 3C 00                              	call delayprog
+[ 294]    02BD: B0 35                                 	mov al,'5'
+[ 295]    02BF: E8 04 FF                              	call writecommand2
+[ 296]    02C2: E8 34 00                              	call delayprog
+[ 297]    02C5: E8 31 00                              	call delayprog
+[ 298]    02C8: E8 2E 00                              	call delayprog
+[ 299]    02CB: B0 36                                 	mov al,'6'
+[ 300]    02CD: E8 F6 FE                              	call writecommand2
+[ 301]    02D0: E8 26 00                              	call delayprog
+[ 302]    02D3: E8 23 00                              	call delayprog
+[ 303]    02D6: E8 20 00                              	call delayprog
+[ 304]    02D9: B0 20                                 	mov al,' '
+[ 305]    02DB: E8 E8 FE                              	call writecommand2
+[ 306]    02DE: E8 18 00                              	call delayprog
+[ 307]    02E1: E8 15 00                              	call delayprog
+[ 308]    02E4: E8 12 00                              	call delayprog
+[ 309]    02E7: C3                                    	ret
+[ 310]        :                                       print62256 endp
+[ 311]        :                                       
+[ 312]    02E8:                                       writedata proc                               ;passing data to lcd to print
+[ 313]    02E8: 52                                    	push dx
+[ 314]    02E9: BA 10 00                              	mov dx,porta1
+[ 315]    02EC: EE                                    	out dx,al
+[ 316]    02ED: B0 05                                 	mov al,00000101b   ; RS=1, R/W=0, E=1 for H-to-L pulse
+[ 317]    02EF: BA 12 00                              	mov dx,portb1
+[ 318]    02F2: EE                                    	out dx,al
+[ 319]    02F3: B0 01                                 	mov al,00000001b   ; RS=1, R/W=0 and E=0 for H-to-L pulse
+[ 320]    02F5: 8B D0                                 	mov dx,ax
+[ 321]    02F7: 5A                                    	pop dx
+[ 322]    02F8: C3                                    	ret
+[ 323]        :                                       writedata endp
+[ 324]        :                                       
+[ 325]    02F9:                                       delayprog proc                              ;delaying the program
+[ 326]        :                                       
+[ 327]    02F9: B9 2D 05                              	mov cx,1325
+[ 328]    02FC: 90                                    w:	nop
+[ 329]    02FD: 90                                    	nop
+[ 330]    02FE: 90                                    	nop
+[ 331]    02FF: 90                                    	nop
+[ 332]    0300: 90                                    	nop
+[ 333]    0301: 49                                    	dec cx
+[ 334]    0302: 83 F9 00                              	cmp cx,00
+[ 335]    0305: 75 F5                                 	jnz w
+[ 336]    0307: C3                                    	ret
+[ 337]        :                                       delayprog endp
+[ 338]        :                                       
+[ 339]    0308:                                       memread proc near                              ;reading from the selected ram
+[ 340]    0308: B0 82                                 	mov al,82h
+[ 341]    030A: E6 26                                 	out creg2,al
+[ 342]        :                                       	
+[ 343]    030C: 8A C2                                 	mov al,dl
+[ 344]    030E: E6 20                                 	out porta2,al
+[ 345]        :                                       	
+[ 346]    0310: 8A C6                                 	mov al,dh
+[ 347]    0312: E6 24                                 	out portc2,al
+[ 348]        :                                       	
+[ 349]    0314: E4 22                                 	in al,portb2
+[ 350]    0316: E8 E0 FF                              	call delayprog
+[ 351]    0319: C3                                    	ret
+[ 352]        :                                       memread endp
+[ 353]        :                                       
+[ 354]    031A:                                       memwrite proc near                             ;writing to the selected ram
+[ 355]    031A: B0 80                                 	mov al,80h
+[ 356]    031C: E6 26                                 	out creg2,al
+[ 357]        :                                       	
+[ 358]    031E: 8A C2                                 	mov al,dl
+[ 359]    0320: E6 20                                 	out porta2,al
+[ 360]        :                                       	
+[ 361]    0322: 8A C6                                 	mov al,dh
+[ 362]    0324: E6 24                                 	out portc2,al
+[ 363]        :                                       	
+[ 364]    0326: 8A C5                                 	mov al,ch
+[ 365]    0328: E6 22                                 	out portb2,al
+[ 366]    032A: E8 CC FF                              	call delayprog
+[ 367]    032D: C3                                    	ret
+[ 368]        :                                       memwrite endp
+[ 369]        :                                       	
+[ 370]        :                                       
+[ 371]        :                                       
+[ 372]        :                                       end
+[ 373]        :                                       
+[ 374]        :                                       
+ 
+===================================================================================================
+ 
+
+
+
+
+===================================================================================================
